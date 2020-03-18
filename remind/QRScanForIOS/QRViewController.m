@@ -9,6 +9,10 @@
 
 
 #import "QRScanForIOSHeader.h"
+#import "NetWorkRequest.h"
+#import "GoodsEditViewController.h"
+#import "ProfileViewController.h"
+
 
 //#import "Masonry.h"
 
@@ -21,8 +25,8 @@
     QRMaskView * qr_mask_view_;                         //顶部蒙版视图
     QRScanAnimationView * qr_scan_animation_view_;      //扫码动画视图
     
-    
-    
+    BOOL isLightOn;
+    UIButton *btn;
 }
 
 @property (nonatomic,weak) IBOutlet UIView * topView_;
@@ -33,7 +37,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
+    isLightOn = NO;
     
     self.view.backgroundColor=[UIColor whiteColor];
 
@@ -52,10 +56,11 @@
     
     //这个是用来设置扫描区域的frame的，这个frame需要注意的是，必须是AVCaptureVideoPreviewLayer所在的layer上的frame，在当前软件中，因为顶部有一个topview，所以应该要在原有的self.view.center.y的基础上下移20+64个像素
     
-    scan_frame_ = CGRectMake(qr_scan_animation_view_.frame.origin.x,
+        scan_frame_ = CGRectMake(qr_scan_animation_view_.frame.origin.x,
                              qr_scan_animation_view_.frame.origin.y-84,
                              qr_scan_animation_view_.bounds.size.width,
                              qr_scan_animation_view_.bounds.size.height) ;
+
     
     
     qr_mask_view_=[[QRMaskView alloc]initMaskViewWithFrame:CGRectMake(0, 84, self.view.frame.size.width, self.view.frame.size.height - 84) withScanFrame:scan_frame_];
@@ -87,11 +92,40 @@
     
     
 //    [self creatUI];
-    
+    btn = [[UIButton alloc]init];
+    btn.frame = CGRectMake(107, 544, 174, 48);
+    btn.backgroundColor = [UIColor colorWithRed:0/255.0 green:0/255.0 blue:0/255.0 alpha:1/1.0];
+    [btn addTarget:self action:@selector(btnClick:) forControlEvents:UIControlEventTouchUpInside];
+    [btn setTitle:@"开启"forState:UIControlStateNormal];
+    [self.view addSubview:btn];
     [qr_scan_manager_ startScan];
     
     
 }
+
+
+-(void)btnClick:(UIButton *)btn{
+    Class captureDeviceClass = NSClassFromString(@"AVCaptureDevice");
+    if (captureDeviceClass != nil) {
+        AVCaptureDevice *device = [AVCaptureDevice defaultDeviceWithMediaType:AVMediaTypeVideo];
+        [device lockForConfiguration:nil];
+        if (isLightOn) {
+            [device setTorchMode:AVCaptureTorchModeOff];
+            [device setFlashMode:AVCaptureFlashModeOff];
+            isLightOn = NO;
+            [btn setTitle:@"开启" forState:UIControlStateNormal];
+        }else{
+           [device setTorchMode:AVCaptureTorchModeOn];
+           [device setFlashMode:AVCaptureFlashModeOn];
+           isLightOn = YES;
+           [btn setTitle:@"关闭" forState:UIControlStateNormal];
+        }
+        [device unlockForConfiguration];
+    }
+}
+
+
+
 
 - (void)viewWillAppear:(BOOL)animated
 {
@@ -102,8 +136,6 @@
     [qr_scan_manager_ startScan];
     //开启动画
     [qr_scan_animation_view_ startAnimation];
-    
-
 }
 - (void)viewWillDisappear:(BOOL)animated
 {
@@ -119,48 +151,65 @@
 {
     // id 类型不能点语法,所以要先去取出数组中对象
     AVMetadataMachineReadableCodeObject *object = [metadataObjects lastObject];
- 
-
     if (object == nil) return;
-    
-    NSLog(@"得到的qr字符串为：%@",object.stringValue);
-    
-    [qr_scan_manager_ stopScan];
-     //停止动画
-    [qr_scan_animation_view_ stopAnimation];
-    
-    
-    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"扫码结果" message:object.stringValue preferredStyle:UIAlertControllerStyleAlert];
+    if (![object.type isEqualToString:AVMetadataObjectTypeQRCode] )
+    {
+        NSLog(@"得到的qr字符串为：%@",object.stringValue);
+        [qr_scan_manager_ stopScan];
+         //停止动画
+        [qr_scan_animation_view_ stopAnimation];
 
-    
+        NSDictionary * dict = [NetWorkRequest requestBarCode:object.stringValue];
+        if(dict == nil){
+                        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"扫码结果" message:@"商品未收录或请求服务器失败!" preferredStyle:UIAlertControllerStyleAlert];
 
-    [alertController addAction:[UIAlertAction actionWithTitle:@"重新扫码" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            [alertController addAction:[UIAlertAction actionWithTitle:@"重新扫码" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
 
-    [self->qr_scan_manager_ startScan];
-    [self->qr_scan_animation_view_ startAnimation];
+            [self->qr_scan_manager_ startScan];
+            [self->qr_scan_animation_view_ startAnimation];
+            }]];
+            
+            [alertController addAction:[UIAlertAction actionWithTitle:@"手动录入" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                           NSLog(@"点击确认");
+                GoodsEditViewController *goods = [[GoodsEditViewController alloc]init];
+                goods.hidesBottomBarWhenPushed = YES;
+                goods.navigationItem.title = @"添加物品";
+                [goods setGoodsNo:@"暂无"];
+                [goods setGoodsName:@"暂不支持"];
+                [self.navigationController pushViewController:goods animated:YES];
+                       }]];
+            [self presentViewController:alertController animated:YES completion:nil];
 
-    }]];
-    
-    [alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            
+            
+        }else{
+            UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"扫码结果" message:dict[@"goodsName"] preferredStyle:UIAlertControllerStyleAlert];
 
-           NSLog(@"点击确认");
+            [alertController addAction:[UIAlertAction actionWithTitle:@"重新扫码" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
 
-       }]];
-    
-    [self presentViewController:alertController animated:YES completion:nil];
+            [self->qr_scan_manager_ startScan];
+            [self->qr_scan_animation_view_ startAnimation];
 
+            }]];
+            [alertController addAction:[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+                   NSLog(@"点击确认");
+                GoodsEditViewController *goods = [[GoodsEditViewController alloc]init];
+                goods.hidesBottomBarWhenPushed = YES;
+                goods.navigationItem.title = @"添加物品";
+    //            goods.navigationController.bac
+                [goods setGoodsNo:dict[@"goodsNo"]];
+                [goods setGoodsName:dict[@"goodsName"]];
+                [self.navigationController pushViewController:goods animated:YES];
+                
+    //            [self presentViewController:goods animated:YES completion:nil];
 
-    
-//    if ([object.type isEqualToString:AVMetadataObjectTypeQRCode] )
-//    {
-//
-//        //进一步的操作
-//
-//        // .....
-//
-//
-//
-//    }
+               }]];
+            [self presentViewController:alertController animated:YES completion:nil];
+        }
+
+    }else{
+        NSLog(@"扫码得到的不是条码!%@",object.stringValue);
+    }
 }
 
 - (void)backClick:(UIButton *)btn

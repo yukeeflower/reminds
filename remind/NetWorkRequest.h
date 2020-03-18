@@ -7,10 +7,17 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import <UIKit/UIKit.h>
 NS_ASSUME_NONNULL_BEGIN
 
 @interface NetWorkRequest : NSObject
++(NSString *)requestBarCode:(NSString *)barCodeNo;
+
++(NSDictionary *)getRequest:(NSString *)url;
+
++(NSDictionary *)postRequest:(NSString *)url param:(NSMutableDictionary *)params;
+
++(NSDictionary *)postRequestParam:(NSString *)url param:(NSMutableDictionary *)params;
 
 @end
 

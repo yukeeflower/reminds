@@ -7,10 +7,19 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "Utils.h"
 NS_ASSUME_NONNULL_BEGIN
 
 @interface Tag : NSObject
+@property (nonatomic, strong) NSString *tagId;
+
+@property (nonatomic, strong) NSString *tagName;
+
+@property (nonatomic, strong) UIColor *borderColor;
+
+@property (nonatomic, strong) UIColor *textColor;
+
+-(instancetype)initWithDictionary:(NSDictionary *)dict;
 
 @end
 

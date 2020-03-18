@@ -7,22 +7,21 @@
 //
 
 #import <UIKit/UIKit.h>
-
+#import "GoodsCellModel.h"
 NS_ASSUME_NONNULL_BEGIN
 
-@interface goodsTableViewCell : UITableViewCell
+@interface GoodsCell : UITableViewCell
+@property (nonatomic, strong) IBOutlet UIView *goodsView;
 
-@property (weak, nonatomic) IBOutlet UIView *good1;
-@property (weak, nonatomic) IBOutlet UIImageView *goodImg1;
+@property (nonatomic, strong) IBOutlet UIImageView *goodsImgView;
 
-@property (weak, nonatomic) IBOutlet UILabel *goodName1;
-@property (weak, nonatomic) IBOutlet UILabel *goodTag1;
+@property (nonatomic, strong) IBOutlet UIView *titleContentView;
 
-@property (weak, nonatomic) IBOutlet UIView *good2;
-@property (weak, nonatomic) IBOutlet UIImageView *goodImg2;
+@property (nonatomic, strong) IBOutlet UILabel *goodsNameLabel;
 
-@property (weak, nonatomic) IBOutlet UILabel *goodName2;
-@property (weak, nonatomic) IBOutlet UILabel *goodTag2;
+@property (nonatomic, strong) IBOutlet UILabel *goodsExpiredLabel;
+
+@property (nonatomic, strong)GoodsCellModel  *model;
 
 @end
 

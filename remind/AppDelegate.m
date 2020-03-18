@@ -7,16 +7,17 @@
 //
 
 #import "AppDelegate.h"
-
+#import "TabbarViewController.h"
 @interface AppDelegate ()
 
 @end
 
 @implementation AppDelegate
-
-
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
-    // Override point for customization after application launch.
+    
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+ 
+  
     return YES;
 }
 

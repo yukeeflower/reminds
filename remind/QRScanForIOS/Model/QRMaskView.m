@@ -21,7 +21,7 @@
 {
     self = [super initWithFrame:maskFrame];
     if (self) {
-        self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.5];
+        self.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.6];
         
         UIBezierPath *maskPath = [UIBezierPath bezierPathWithRect:CGRectMake(0, 0, self.frame.size.width, self.frame.size.height)];
         

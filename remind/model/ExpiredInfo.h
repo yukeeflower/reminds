@@ -7,11 +7,21 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "Utils.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ExpiredInfo : NSObject
+@property (nonatomic, strong) NSString *goodsExpiredNameText;
 
+@property (nonatomic, strong) NSString *goodsExpiredTimeText;
+
+@property (nonatomic, strong) UIColor *goodsExpiredNameColor;
+
+@property (nonatomic, strong) UIColor *goodsExpiredTimeColor;
+
+
+-(instancetype)initWithDictionary:(NSDictionary *)dict;
 @end
 
 NS_ASSUME_NONNULL_END

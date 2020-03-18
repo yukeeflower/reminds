@@ -46,4 +46,5 @@ typedef void(^finishBlock)(BOOL finish,NSError * error);
 
 //停止扫描
 - (void)stopScan;
+
 @end
